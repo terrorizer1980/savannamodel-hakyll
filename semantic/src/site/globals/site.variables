@@ -1,0 +1,9 @@
+/*******************************
+     User Global Variables
+*******************************/
+@green       : @emerald;
+@emerald     : #028910;
+@olive       : @parakeet;
+@parakeet    : #03c04a;
+@teal        : @chartreuse;
+@chartreuse  : #d0d767;
