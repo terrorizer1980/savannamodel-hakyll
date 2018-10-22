@@ -1,0 +1,27 @@
+{
+  "name": "savannamodel-hakyll",
+  "version": "1.0.0",
+  "description": "Hakyll project for building the Savanna Model static site",
+  "main": "index.js",
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "semantic-ui": "^2.4.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmp1ce/savannamodel-hakyll.git"
+  },
+  "keywords": [
+    "semantic-ui"
+  ],
+  "author": "David Parrish",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/dmp1ce/savannamodel-hakyll/issues"
+  },
+  "homepage": "https://github.com/dmp1ce/savannamodel-hakyll#readme"
+}

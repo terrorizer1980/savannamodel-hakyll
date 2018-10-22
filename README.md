@@ -7,7 +7,7 @@ Hakyll project for building the Savanna Model static site
 ### Semantic UI and Gulp dependencies
 
 ```
-$ npm install semantic-ui gulp
+$ npm install
 $ cd semantic
 $ gulp build
 ```
