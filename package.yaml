@@ -7,7 +7,7 @@ maintainer: daveparrish@tutanota.com
 extra-source-files:
   - package.yaml
   - stack.yaml
-  - README
+  - README.md
 
 github: dmp1ce/savannamodel
 
