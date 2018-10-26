@@ -87,16 +87,23 @@ loadFoodCategories d t = do
   categoryMetadata <- getAllMetadata r
   mapM (\(i, m) ->
           makeItem "" >>=
-          loadAndApplyTemplate t (foodCategorySectionCtx i m)
+          (\item -> do
+              let d' = takeDirectory $ toFilePath i
+              mainFoodSection <- loadAll $ complement "foods/**/metadata" .&&. fromGlob (d' ++ "/*") :: Compiler [Item String]
+              let mMainFoodSection = if null mainFoodSection then Nothing else Just mainFoodSection
+              secondaryFoodSection <- (loadFoodCategories (takeDirectory $ toFilePath i) "templates/food-category-section-partial.html") :: Compiler [Item String]
+              let mSecondaryFoodSection = if null secondaryFoodSection then Nothing else Just secondaryFoodSection
+              loadAndApplyTemplate t (foodCategorySectionCtx i m mMainFoodSection mSecondaryFoodSection) item
+          )
        ) $ sortOn (\(_, m) -> sortMetadata m) categoryMetadata
 
-foodCategorySectionCtx :: Identifier -> Metadata -> Context String
-foodCategorySectionCtx i m = let d = takeDirectory $ toFilePath i
+foodCategorySectionCtx :: Identifier -> Metadata -> Maybe [Item String] -> Maybe [Item String] -> Context String
+foodCategorySectionCtx i m mFoodSection mSecondaryFoodSection =
+  let primary = maybe mempty (listField "section-category-foods" defaultContext . return) mFoodSection
+      secondary = maybe mempty (listField "secondary-categories" defaultContext . return) mSecondaryFoodSection
   in constField "section-header" (fromMaybe ("Missing category header in " ++ show i) $ lookupString "header" m)
-  <> listField "section-category-foods" defaultContext
-     (loadAll $ complement "foods/**/metadata" .&&. fromGlob (d ++ "/*"))
-  <> listField "secondary-categories" defaultContext
-     (loadFoodCategories (takeDirectory $ toFilePath i) "templates/food-category-section-partial.html")
+  <> primary
+  <> secondary
   <> defaultContext
 
 foodCtx :: Context String

@@ -1,6 +1,12 @@
-<div class="five wide column">
-    $partial("templates/food-category-section-partial.html")$
-    $for(secondary-categories)$
-    $body$
-    $endfor$
+<div class="ui sixteen wide column">
+    <div class="ui segment">
+        $partial("templates/food-category-section-partial.html")$
+        $if(secondary-categories)$
+        <div class="ui segment">
+            $for(secondary-categories)$
+            $body$
+            $endfor$
+        </div>
+        $endif$
+    </div>
 </div>

@@ -1,10 +1,10 @@
-<p>
-    $section-header$
-</p>
-<ul>
+<div class="ui small header">$section-header$</div>
+$if(section-category-foods)$
+<div class="ui celled horizontal list">
     $for(section-category-foods)$
-    <li>
+    <div class="item">
         <a href="$url$">$title$</a>
-    </li>
+    </div>
     $endfor$
-</ul>
+</div>
+$endif$
