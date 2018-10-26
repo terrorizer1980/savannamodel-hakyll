@@ -74,15 +74,16 @@ loadFoodTable = do
        ) $ sortOn (\(_, m) ->  sortMetadata m) colorMetadata
 
 foodColorSectionCtx :: Identifier -> Metadata -> Context String
-foodColorSectionCtx i m
-  =  constField "color-header" (fromMaybe ("Missing header in " ++ show i) $ lookupString "header" m)
-  <> constField "color-class" (fromMaybe "pink" $ lookupString "css-class" m)
+foodColorSectionCtx i m =
+  let color = fromMaybe "pink" $ lookupString "css-class" m
+  in constField "color-header" (fromMaybe ("Missing header in " ++ show i) $ lookupString "header" m)
+  <> constField "color-class" color
   <> listField "food-categories" defaultContext
-     (loadFoodCategories (takeDirectory $ toFilePath i) "templates/food-category-section.html")
+     (loadFoodCategories color (takeDirectory $ toFilePath i) "templates/food-category-section.html")
   <> defaultContext
 
-loadFoodCategories :: FilePath -> Identifier -> Compiler [Item String]
-loadFoodCategories d t = do
+loadFoodCategories :: String -> FilePath -> Identifier -> Compiler [Item String]
+loadFoodCategories color d t = do
   let r = fromGlob $ d ++ "/*/metadata"
   categoryMetadata <- getAllMetadata r
   mapM (\(i, m) ->
@@ -91,17 +92,18 @@ loadFoodCategories d t = do
               let d' = takeDirectory $ toFilePath i
               mainFoodSection <- loadAll $ complement "foods/**/metadata" .&&. fromGlob (d' ++ "/*") :: Compiler [Item String]
               let mMainFoodSection = if null mainFoodSection then Nothing else Just mainFoodSection
-              secondaryFoodSection <- (loadFoodCategories (takeDirectory $ toFilePath i) "templates/food-category-section-partial.html") :: Compiler [Item String]
+              secondaryFoodSection <- (loadFoodCategories color (takeDirectory $ toFilePath i) "templates/food-category-section-partial.html") :: Compiler [Item String]
               let mSecondaryFoodSection = if null secondaryFoodSection then Nothing else Just secondaryFoodSection
-              loadAndApplyTemplate t (foodCategorySectionCtx i m mMainFoodSection mSecondaryFoodSection) item
+              loadAndApplyTemplate t (foodCategorySectionCtx color i m mMainFoodSection mSecondaryFoodSection) item
           )
        ) $ sortOn (\(_, m) -> sortMetadata m) categoryMetadata
 
-foodCategorySectionCtx :: Identifier -> Metadata -> Maybe [Item String] -> Maybe [Item String] -> Context String
-foodCategorySectionCtx i m mFoodSection mSecondaryFoodSection =
+foodCategorySectionCtx :: String -> Identifier -> Metadata -> Maybe [Item String] -> Maybe [Item String] -> Context String
+foodCategorySectionCtx color i m mFoodSection mSecondaryFoodSection =
   let primary = maybe mempty (listField "section-category-foods" defaultContext . return) mFoodSection
       secondary = maybe mempty (listField "secondary-categories" defaultContext . return) mSecondaryFoodSection
   in constField "section-header" (fromMaybe ("Missing category header in " ++ show i) $ lookupString "header" m)
+  <> constField "css-class" color
   <> primary
   <> secondary
   <> defaultContext
