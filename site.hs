@@ -4,7 +4,7 @@ import           Data.Monoid ((<>))
 import           Data.Maybe (fromMaybe)
 import           Data.List (sortOn)
 import           Text.Read (readMaybe)
-import           System.FilePath (takeDirectory)
+import           System.FilePath (takeDirectory, takeFileName)
 import           Hakyll
 
 --------------------------------------------------------------------------------
@@ -17,6 +17,11 @@ main = hakyll $ do
     match "semantic/dist/**" $ do
         route   idRoute
         compile copyFileCompiler
+
+    -- Dump github files in `/` directory
+    match "github/*" $ do
+      route $ customRoute (takeFileName . toFilePath)
+      compile copyFileCompiler
 
     match "about.markdown" $ pageRules "page-about"
 
