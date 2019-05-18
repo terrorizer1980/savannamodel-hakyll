@@ -1,8 +1,13 @@
 <article class="ui text container">
-    <section class="header">
-        <h1>$title$</h1>
-    </section>
-    <section>
-        $body$
-    </section>
+    <h1 class="ui center aligned header">$title$</h1>
+    <p>
+        $if(image)$
+        $if(image_source)$
+        <a class="ui fuild image" href="$image_source$"><img src="/images/$image$"></a>
+        $else$
+        <img class="ui fluid image" src="/images/$image$">
+        $endif$
+        $endif$
+    </p>
+    $body$
 </article>
