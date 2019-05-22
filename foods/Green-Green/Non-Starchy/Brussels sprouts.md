@@ -4,13 +4,13 @@ image_source: https://commons.wikimedia.org/wiki/File:Brussels_Sprouts_ready_for
 ---
 # Guideline
 
-Brussels Sprouts are a *Green-Green* food and safe to eat as a regular part of your diet.
+Brussels Sprouts is a *Green-Green* food and safe to eat as a regular part of your diet.
+
+*Eat at least 2 3/4 lbs of mixed salad and vegetables per day, consisting of "Green-Green” and “Green” foods. Of these, at least 3/4 lb should be mixed salad. Also include at least 5 cups of “Green-Green” leafy vegetables or 2 1/2 cups of other vegetables per week.* ~[Paleo in a Nutshell](/about.html) p.102
 
 # Quotes
 
 Brussels Sprouts are a *low-glycemic, rich in micronutrients and fiber, and harmless with regard to anti-nutrients and antigens.* ~[Paleo in a Nutshell](/about.html) p.70
-
-*Eat at least 2 3/4 lbs of mixed salad and vegetables per day, consisting of "Green-Green” and “Green” foods. Of these, at least 3/4 lb should be mixed salad. Also include at least 5 cups of “Green-Green” leafy vegetables or 2 1/2 cups of other vegetables per week.* ~[Paleo in a Nutshell](/about.html) p.102
 
 *modern species of intensively cultivated plants tend to have lower protein content, but there are exceptions: Brussels sprouts contain 24% protein per 100 grams dry-weight.* ~[Deadly Harvest](/about.html) p.125
 
