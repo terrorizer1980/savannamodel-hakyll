@@ -6,6 +6,7 @@ import           Data.List (sortOn)
 import           Text.Read (readMaybe)
 import           System.FilePath (takeDirectory, takeFileName)
 import           Hakyll
+import Control.Monad (filterM)
 
 --------------------------------------------------------------------------------
 main :: IO ()
@@ -26,24 +27,35 @@ main = hakyll $ do
     match "about.markdown" $ pageRules "page-about"
 
     match (complement "foods/**/metadata" .&&. "foods/**") $ do
-        route $ setExtension "html"
-        compile $ pandocCompiler
-            >>= loadAndApplyTemplate "templates/food.html"    foodCtx
-            >>= loadAndApplyTemplate "templates/default.html" foodCtx
-            >>= relativizeUrls
+      route $ setExtension "html"
+      compile $ do
+
+        mFoodname <- getUnderlying >>= flip getMetadataField "foodname"
+
+        quotes <- case mFoodname of
+          Just foodname -> filterQuotes foodname =<< loadAll "quotes/*"
+          Nothing -> return []
+        let foodCtx' =
+                listField "quotes" defaultContext (return quotes) <>
+                foodCtx
+
+        pandocCompiler
+          >>= loadAndApplyTemplate "templates/food.html"    foodCtx'
+          >>= loadAndApplyTemplate "templates/default.html" foodCtx'
+          >>= relativizeUrls
 
     match "foods.html" $ do
         route idRoute
         compile $ do
-            let foodsCtx =
-                  constField "page-foods" "" <>
-                  listField "food-color-sections" defaultContext loadFoodTable <>
-                  defaultContext
+          let foodsCtx =
+                constField "page-foods" "" <>
+                listField "food-color-sections" defaultContext loadFoodTable <>
+                defaultContext
 
-            getResourceBody
-              >>= applyAsTemplate foodsCtx
-              >>= loadAndApplyTemplate "templates/default.html" foodsCtx
-              >>= relativizeUrls
+          getResourceBody
+            >>= applyAsTemplate foodsCtx
+            >>= loadAndApplyTemplate "templates/default.html" foodsCtx
+            >>= relativizeUrls
 
     match "index.html" $ do
         route idRoute
@@ -59,6 +71,15 @@ main = hakyll $ do
 
     match "templates/*" $ compile templateBodyCompiler
     match "foods/**/metadata" $ compile templateCompiler
+    match "quotes/*" $ compile getResourceBody
+
+-- | Return only quotes which are tagged with food name
+filterQuotes :: MonadMetadata m => String -> [Item a] -> m [Item a]
+filterQuotes foodname ids =
+  let f :: MonadMetadata m => String -> Item a -> m Bool
+      f fn (Item i _) = do tags <- getTags i
+                           return $ elem fn tags
+  in filterM (f foodname) ids
 
 pageRules :: String -> Rules ()
 pageRules pageLabel = do
