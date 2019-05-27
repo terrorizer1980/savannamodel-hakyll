@@ -9,13 +9,7 @@
         $endif$
         $endif$
     </p>
-        $body$
-    $if(quotes)$<p>
-        <h1>Quotes</h1>
-            $for(quotes)$
-            <p>
-            $body$ ~<a href="/about.html">$book$</a> p.$page$
-            </p>
-            $endfor$
-    </p>$endif$
+    $body$
+    $partial("templates/color-section.html")$
+    $partial("templates/quotes-section.html")$
 </article>

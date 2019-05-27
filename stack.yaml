@@ -18,7 +18,12 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-9.21
+#resolver: lts-12.26
+
+# Attempt to get some of the latest Hakyll functions like getCategory
+# Turns out this nightly doesn't have getCategory but kept because it built fine
+# Use later LTS ASAP
+resolver: nightly-2019-03-03
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -39,6 +44,9 @@ packages:
 # using the same syntax as the packages field.
 # (e.g., acme-missiles-0.3)
 # extra-deps: []
+extra-deps:
+  # For getCategory function
+- hakyll-4.12.5.2
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

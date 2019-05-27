@@ -7,6 +7,7 @@ import           Text.Read (readMaybe)
 import           System.FilePath (takeDirectory, takeFileName)
 import           Hakyll
 import Control.Monad (filterM)
+import System.FilePath (splitDirectories)
 
 --------------------------------------------------------------------------------
 main :: IO ()
@@ -30,18 +31,23 @@ main = hakyll $ do
       route $ setExtension "html"
       compile $ do
 
-        mFoodname <- getUnderlying >>= flip getMetadataField "foodname"
+        -- Get color context
+        color <- head <$> (getUnderlying >>= getCategory')
+        mColorItem <- findColor color =<< loadAll "colors/sections/*"
 
+        -- Get quotes context
+        mFoodname <- getUnderlying >>= flip getMetadataField "foodname"
         quotes <- case mFoodname of
           Just foodname -> filterQuotes foodname =<< loadAll "quotes/*"
           Nothing -> return []
-        let foodCtx' =
+        let foodCtx =
                 listField "quotes" defaultContext (return quotes) <>
-                foodCtx
+                maybe mempty (\c -> constField "color-section" (itemBody c)) mColorItem <>
+                defaultContext
 
         pandocCompiler
-          >>= loadAndApplyTemplate "templates/food.html"    foodCtx'
-          >>= loadAndApplyTemplate "templates/default.html" foodCtx'
+          >>= loadAndApplyTemplate "templates/food.html"    foodCtx
+          >>= loadAndApplyTemplate "templates/default.html" foodCtx
           >>= relativizeUrls
 
     match "foods.html" $ do
@@ -72,6 +78,22 @@ main = hakyll $ do
     match "templates/*" $ compile templateBodyCompiler
     match "foods/**/metadata" $ compile templateCompiler
     match "quotes/*" $ compile getResourceBody
+    match "colors/sections/*" $ compile getResourceBody
+
+-- | Return only the color item specified in color metadata
+findColor :: MonadMetadata m => String -> [Item a] -> m (Maybe (Item a))
+findColor colorname colors =
+  let f :: MonadMetadata m => String -> Item a -> m Bool
+      f cn (Item i _) = do mc <- (getMetadataField i "color")
+                           return (mc == (Just cn))
+      head' (x:_) = Just x
+      head' [] = Nothing
+  in head' <$> filterM (f colorname) colors
+
+-- | Obtain categories from a page. Modified from Hakyll function with the same name.
+getCategory' :: MonadMetadata m => Identifier -> m [String]
+getCategory' = return . tail' . splitDirectories . takeDirectory . toFilePath
+  where tail' (_:xs) = xs; tail' _ = []
 
 -- | Return only quotes which are tagged with food name
 filterQuotes :: MonadMetadata m => String -> [Item a] -> m [Item a]
@@ -96,7 +118,7 @@ loadFoodTable = do
   colorMetadata <- getAllMetadata "foods/*/metadata"
   mapM (\(i, m) ->
           makeItem "" >>=
-          loadAndApplyTemplate "templates/food-color-section.html" (foodColorSectionCtx i m)
+          loadAndApplyTemplate "templates/foods-color-section.html" (foodColorSectionCtx i m)
        ) $ sortOn (\(_, m) ->  sortMetadata m) colorMetadata
 
 foodColorSectionCtx :: Identifier -> Metadata -> Context String
@@ -133,11 +155,6 @@ foodCategorySectionCtx color i m mFoodSection mSecondaryFoodSection =
   <> primary
   <> secondary
   <> defaultContext
-
-foodCtx :: Context String
-foodCtx =
-    constField "page-foods" "" <>
-    defaultContext
 
 sortMetadata :: Metadata -> Maybe Integer
 sortMetadata m = lookupString "sort" m >>= readMaybe
