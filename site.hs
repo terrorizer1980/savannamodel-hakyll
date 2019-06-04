@@ -41,7 +41,7 @@ main = hakyll $ do
           Just foodname -> filterQuotes foodname =<< loadAll "quotes/*"
           Nothing -> return []
         let foodCtx =
-                listField "quotes" defaultContext (return quotes) <>
+                listField "quotes" defaultContext (sortItems "ord" quotes) <>
                 maybe mempty (\c -> constField "color-section" (itemBody c)) mColorItem <>
                 defaultContext
 
@@ -94,6 +94,16 @@ findColor colorname colors =
 getCategory' :: MonadMetadata m => Identifier -> m [String]
 getCategory' = return . tail' . splitDirectories . takeDirectory . toFilePath
   where tail' (_:xs) = xs; tail' _ = []
+
+
+-- | Sort items by metadata string
+sortItems :: MonadMetadata m => String -> [Item a] -> m [Item a]
+sortItems s is = do
+  is' <- mapM (\i -> do
+                  ord <- getMetadataField (itemIdentifier i) s
+                  return (ord,i)
+              ) is
+  return $ map snd $ sortOn (\(s',_) -> s') is'
 
 -- | Return only quotes which are tagged with food name
 filterQuotes :: MonadMetadata m => String -> [Item a] -> m [Item a]
