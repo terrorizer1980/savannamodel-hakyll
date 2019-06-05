@@ -11,6 +11,9 @@ extra-source-files:
 
 github: dmp1ce/savannamodel
 
+default-extensions:
+  - OverloadedStrings
+
 ghc-options:
   - -O2
   - -Wall

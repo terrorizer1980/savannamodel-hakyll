@@ -1,5 +1,6 @@
+module Main where
+
 --------------------------------------------------------------------------------
-{-# LANGUAGE OverloadedStrings #-}
 import           Data.Monoid ((<>))
 import           Data.Maybe (fromMaybe)
 import           Data.List (sortOn)
