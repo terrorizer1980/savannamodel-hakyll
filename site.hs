@@ -42,9 +42,10 @@ main = hakyll $ do
           Just foodname -> filterQuotes foodname =<< loadAll "quotes/*"
           Nothing -> return []
         let foodCtx =
-                listField "quotes" defaultContext (sortItems "ord" quotes) <>
-                maybe mempty (\c -> constField "color-section" (itemBody c)) mColorItem <>
-                defaultContext
+                defaultContext <>
+                constField "color" color <>
+                maybe missingField (\c -> constField "color-section" (itemBody c)) mColorItem <>
+                if (length quotes == 0) then missingField else (listField "quotes" defaultContext (sortQuotes quotes))
 
         pandocCompiler
           >>= loadAndApplyTemplate "templates/food.html"    foodCtx
@@ -105,6 +106,24 @@ sortItems s is = do
                   return (ord,i)
               ) is
   return $ map snd $ sortOn (\(s',_) -> s') is'
+
+-- | Sort quotes
+sortQuotes :: MonadMetadata m => [Item a] -> m [Item a]
+sortQuotes is = do
+  meta <- mapM (\i -> do
+                  book <- getMetadataField (itemIdentifier i) "book"
+                  page <- getMetadataField (itemIdentifier i) "page"
+                  let page' = readMaybe =<< page
+                  return $ (QuoteMetadata book page',i)
+              ) is
+  return $ map snd $ sortOn (\(s',_) -> s') meta
+
+-- | Prioritize "Paleo in a Nutshell" first because it is a newer book.
+data QuoteMetadata = QuoteMetadata (Maybe String) (Maybe Int) deriving Eq
+instance Ord QuoteMetadata where
+  (<=) (QuoteMetadata (Just "Paleo in a Nutshell") _) (QuoteMetadata (Just "Deadly Harvest") _) = True
+  (<=) (QuoteMetadata (Just "Deadly Harvest") _) (QuoteMetadata (Just "Paleo in a Nutshell") _) = False
+  (<=) (QuoteMetadata _ i) (QuoteMetadata _ i') = i <= i'
 
 -- | Return only quotes which are tagged with food name
 filterQuotes :: MonadMetadata m => String -> [Item a] -> m [Item a]
