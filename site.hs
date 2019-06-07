@@ -37,9 +37,9 @@ main = hakyll $ do
         mColorItem <- findColor color =<< loadAll "colors/sections/*"
 
         -- Get quotes context
-        mFoodname <- getUnderlying >>= flip getMetadataField "foodname"
-        quotes <- case mFoodname of
-          Just foodname -> filterQuotes foodname =<< loadAll "quotes/*"
+        mFoodtag <- getUnderlying >>= flip getMetadataField "foodtag"
+        quotes <- case mFoodtag of
+          Just foodtag -> filterQuotes foodtag =<< loadAll "quotes/*"
           Nothing -> return []
         let foodCtx =
                 defaultContext <>
@@ -127,11 +127,11 @@ instance Ord QuoteMetadata where
 
 -- | Return only quotes which are tagged with food name
 filterQuotes :: MonadMetadata m => String -> [Item a] -> m [Item a]
-filterQuotes foodname ids =
+filterQuotes foodtag ids =
   let f :: MonadMetadata m => String -> Item a -> m Bool
       f fn (Item i _) = do tags <- getTags i
                            return $ elem fn tags
-  in filterM (f foodname) ids
+  in filterM (f foodtag) ids
 
 pageRules :: String -> Rules ()
 pageRules pageLabel = do
