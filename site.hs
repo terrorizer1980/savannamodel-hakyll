@@ -113,17 +113,19 @@ sortQuotes is = do
   meta <- mapM (\i -> do
                   book <- getMetadataField (itemIdentifier i) "book"
                   page <- getMetadataField (itemIdentifier i) "page"
+                  ord <- getMetadataField (itemIdentifier i) "ord"
                   let page' = readMaybe =<< page
-                  return $ (QuoteMetadata book page',i)
+                      ord' = readMaybe =<< ord
+                  return $ (QuoteMetadata book page' ord',i)
               ) is
   return $ map snd $ sortOn (\(s',_) -> s') meta
 
 -- | Prioritize "Paleo in a Nutshell" first because it is a newer book.
-data QuoteMetadata = QuoteMetadata (Maybe String) (Maybe Int) deriving Eq
+data QuoteMetadata = QuoteMetadata (Maybe String) (Maybe Int) (Maybe Int) deriving Eq
 instance Ord QuoteMetadata where
-  (<=) (QuoteMetadata (Just "Paleo in a Nutshell") _) (QuoteMetadata (Just "Deadly Harvest") _) = True
-  (<=) (QuoteMetadata (Just "Deadly Harvest") _) (QuoteMetadata (Just "Paleo in a Nutshell") _) = False
-  (<=) (QuoteMetadata _ i) (QuoteMetadata _ i') = i <= i'
+  (<=) (QuoteMetadata (Just "Paleo in a Nutshell") _ _) (QuoteMetadata (Just "Deadly Harvest") _ _) = True
+  (<=) (QuoteMetadata (Just "Deadly Harvest") _ _) (QuoteMetadata (Just "Paleo in a Nutshell") _ _) = False
+  (<=) (QuoteMetadata _ i o) (QuoteMetadata _ i' o') = if i == i' then o <= o' else i <= i'
 
 -- | Return only quotes which are tagged with food name
 filterQuotes :: MonadMetadata m => String -> [Item a] -> m [Item a]
