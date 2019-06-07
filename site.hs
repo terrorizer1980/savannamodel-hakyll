@@ -44,8 +44,8 @@ main = hakyll $ do
         let foodCtx =
                 defaultContext <>
                 constField "color" color <>
-                maybe missingField (\c -> constField "color-section" (itemBody c)) mColorItem <>
-                if (length quotes == 0) then missingField else (listField "quotes" defaultContext (sortQuotes quotes))
+                maybe mempty (\c -> constField "color-section" (itemBody c)) mColorItem <>
+                if (length quotes == 0) then mempty else (listField "quotes" defaultContext (sortQuotes quotes))
 
         pandocCompiler
           >>= loadAndApplyTemplate "templates/food.html"    foodCtx
