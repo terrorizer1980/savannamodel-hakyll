@@ -6,8 +6,8 @@ import           Data.Maybe (fromMaybe)
 import           Data.List (sortOn)
 import           Text.Read (readMaybe)
 import           System.FilePath (takeDirectory, takeFileName, splitDirectories)
+import           Control.Monad (filterM)
 import           Hakyll
-import Control.Monad (filterM)
 
 --------------------------------------------------------------------------------
 main :: IO ()
