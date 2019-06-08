@@ -5,10 +5,9 @@ import           Data.Monoid ((<>))
 import           Data.Maybe (fromMaybe)
 import           Data.List (sortOn)
 import           Text.Read (readMaybe)
-import           System.FilePath (takeDirectory, takeFileName)
+import           System.FilePath (takeDirectory, takeFileName, splitDirectories)
 import           Hakyll
 import Control.Monad (filterM)
-import System.FilePath (splitDirectories)
 
 --------------------------------------------------------------------------------
 main :: IO ()
@@ -44,8 +43,8 @@ main = hakyll $ do
         let foodCtx =
                 defaultContext <>
                 constField "color" color <>
-                maybe mempty (\c -> constField "color-section" (itemBody c)) mColorItem <>
-                if (length quotes == 0) then mempty else (listField "quotes" defaultContext (sortQuotes quotes))
+                maybe mempty (constField "color-section" . itemBody) mColorItem <>
+                if null quotes then mempty else listField "quotes" defaultContext (sortQuotes quotes)
 
         pandocCompiler
           >>= loadAndApplyTemplate "templates/food.html"    foodCtx
@@ -86,8 +85,8 @@ main = hakyll $ do
 findColor :: MonadMetadata m => String -> [Item a] -> m (Maybe (Item a))
 findColor colorname colors =
   let f :: MonadMetadata m => String -> Item a -> m Bool
-      f cn (Item i _) = do mc <- (getMetadataField i "color")
-                           return (mc == (Just cn))
+      f cn (Item i _) = do mc <- getMetadataField i "color"
+                           return (mc == Just cn)
       head' (x:_) = Just x
       head' [] = Nothing
   in head' <$> filterM (f colorname) colors
@@ -105,7 +104,7 @@ sortItems s is = do
                   ord <- getMetadataField (itemIdentifier i) s
                   return (ord,i)
               ) is
-  return $ map snd $ sortOn (\(s',_) -> s') is'
+  return $ map snd $ sortOn fst is'
 
 -- | Sort quotes
 sortQuotes :: MonadMetadata m => [Item a] -> m [Item a]
@@ -116,9 +115,9 @@ sortQuotes is = do
                   ord <- getMetadataField (itemIdentifier i) "ord"
                   let page' = readMaybe =<< page
                       ord' = readMaybe =<< ord
-                  return $ (QuoteMetadata book page' ord',i)
+                  return (QuoteMetadata book page' ord',i)
               ) is
-  return $ map snd $ sortOn (\(s',_) -> s') meta
+  return $ map snd $ sortOn fst meta
 
 -- | Prioritize "Paleo in a Nutshell" first because it is a newer book.
 data QuoteMetadata = QuoteMetadata (Maybe String) (Maybe Int) (Maybe Int) deriving Eq
@@ -172,7 +171,7 @@ loadFoodCategories color d t = do
               let d' = takeDirectory $ toFilePath i
               mainFoodSection <- loadAll $ complement "foods/**/metadata" .&&. fromGlob (d' ++ "/*") :: Compiler [Item String]
               let mMainFoodSection = if null mainFoodSection then Nothing else Just mainFoodSection
-              secondaryFoodSection <- (loadFoodCategories color (takeDirectory $ toFilePath i) "templates/food-category-section-partial.html") :: Compiler [Item String]
+              secondaryFoodSection <- loadFoodCategories color (takeDirectory $ toFilePath i) "templates/food-category-section-partial.html" :: Compiler [Item String]
               let mSecondaryFoodSection = if null secondaryFoodSection then Nothing else Just secondaryFoodSection
               loadAndApplyTemplate t (foodCategorySectionCtx color i m mMainFoodSection mSecondaryFoodSection) item
           )
