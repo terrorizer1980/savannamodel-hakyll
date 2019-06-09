@@ -3,9 +3,9 @@ module Main where
 --------------------------------------------------------------------------------
 import           Data.Monoid ((<>))
 import           Data.Maybe (fromMaybe)
-import           Data.List (sortOn)
+import           Data.List (sortOn, intersect)
 import           Text.Read (readMaybe)
-import           System.FilePath (takeDirectory, takeFileName, splitDirectories)
+import           System.FilePath (takeDirectory, takeFileName, splitDirectories, joinPath)
 import           Control.Monad (filterM)
 import           Hakyll
 
@@ -33,7 +33,10 @@ main = hakyll $ do
 
         -- Get color context
         color <- head <$> (getUnderlying >>= getCategory')
-        mColorItem <- findColor color =<< loadAll "colors/sections/*"
+        cats <- tail <$> (getUnderlying >>= getCategory')
+        colorItem <- applyAsTemplate (constField "color" color)
+                     =<< load (fromFilePath $ "colors/sections/" ++ color ++ ".html")
+        colorQuotes <- loadAll $ fromGlob $ "colors/sections/" ++ joinPath (color : cats) ++ "/*"
 
         -- Get quotes context
         mFoodtag <- getUnderlying >>= flip getMetadataField "foodtag"
@@ -43,8 +46,11 @@ main = hakyll $ do
         let foodCtx =
                 defaultContext <>
                 constField "color" color <>
-                maybe mempty (constField "color-section" . itemBody) mColorItem <>
-                if null quotes then mempty else listField "quotes" defaultContext (sortQuotes quotes)
+                (constField "color-section" . itemBody) colorItem <>
+                (if null quotes then mempty
+                   else listField "quotes" defaultContext (sortQuotes quotes)) <>
+                (if null colorQuotes then mempty
+                   else listField "color-quotes" defaultContext (sortQuotes colorQuotes))
 
         pandocCompiler
           >>= loadAndApplyTemplate "templates/food.html"    foodCtx
@@ -79,14 +85,15 @@ main = hakyll $ do
     match "templates/*" $ compile templateBodyCompiler
     match "foods/**/metadata" $ compile templateCompiler
     match "quotes/*" $ compile getResourceBody
-    match "colors/sections/*" $ compile getResourceBody
+    match "colors/sections/**" $ compile getResourceBody
 
 -- | Return only the color item specified in color metadata
-findColor :: MonadMetadata m => String -> [Item a] -> m (Maybe (Item a))
-findColor colorname colors =
-  let f :: MonadMetadata m => String -> Item a -> m Bool
+findColor :: MonadMetadata m => String -> [String] -> [Item a] -> m (Maybe (Item a))
+findColor colorname fCats colors =
+  let f :: MonadMetadata m => String ->  Item a -> m Bool
       f cn (Item i _) = do mc <- getMetadataField i "color"
-                           return (mc == Just cn)
+                           cTags <- getTags i
+                           return (mc == Just cn && (not . null) (cTags `intersect` fCats))
       head' (x:_) = Just x
       head' [] = Nothing
   in head' <$> filterM (f colorname) colors

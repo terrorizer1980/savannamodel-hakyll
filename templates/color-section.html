@@ -1,5 +1,13 @@
 $if(color-section)$
-<p>$title$ is a <i>$color$</i> food and safe to eat as a regular part of your diet.</p>
+<p>
+    $title$ is a <i>$color$</i> food. $color-section$
+</p>
+$endif$
 
-$color-section$
+$if(color-quotes)$
+$for(color-quotes)$
+<p>
+    $body$ ~<a href="/about.html">$book$</a> p.$page$
+</p>
+$endfor$
 $endif$
