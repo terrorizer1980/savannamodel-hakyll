@@ -2,14 +2,15 @@
     <h1 class="ui center aligned header">$title$</h1>
     <p>
         $if(image)$
-        $if(image_source)$
-        <a href="$image_source$"><img class="ui centered image" src="$image$"></a>
-        $else$
         <img class="ui centered image" src="$image$">
         $endif$
-        $endif$
     </p>
-    $body$
+    <p>$body$</p>
     $partial("templates/color-section.html")$
     $partial("templates/quotes-section.html")$
+
+    $if(image_source)$
+    <h3>Image Source</h3>
+    <small><a href="$image_source$">$image_source$</a></small>
+    $endif$
 </article>

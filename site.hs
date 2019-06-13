@@ -3,7 +3,7 @@ module Main where
 --------------------------------------------------------------------------------
 import           Data.Monoid ((<>))
 import           Data.Maybe (fromMaybe)
-import           Data.List (sortOn, intersect)
+import           Data.List (sortOn, intersect, intercalate)
 import           Text.Read (readMaybe)
 import           System.FilePath (takeDirectory, takeFileName, splitDirectories, joinPath)
 import           Control.Monad (filterM)
@@ -46,6 +46,7 @@ main = hakyll $ do
         let foodCtx =
                 defaultContext <>
                 constField "color" color <>
+                constField "food-categories" (intercalate ", " cats) <>
                 (constField "color-section" . itemBody) colorItem <>
                 (if null quotes then mempty
                    else listField "quotes" defaultContext (sortQuotes quotes)) <>
