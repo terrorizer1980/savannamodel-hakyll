@@ -1,6 +1,6 @@
 ---
 title: Beet greens
 foodtag: beet-greens
-image: https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Beets-Bundle.jpg/1024px-Beets-Bundle.jpg
-image_source: https://commons.wikimedia.org/wiki/File:Beets-Bundle.jpg
+image: https://www.seriouseats.com/recipes/images/20101109beetgreengratin.jpg
+image_source: https://www.seriouseats.com/recipes/2010/11/cook-the-book-beet-green-gratin-thanksgiving-sides.html
 ---
