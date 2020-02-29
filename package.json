@@ -1,11 +1,14 @@
 {
   "name": "savannamodel-hakyll",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Hakyll project for building the Savanna Model static site",
   "main": "index.js",
   "dependencies": {
-    "gulp": "^3.9.1",
-    "semantic-ui": "^2.4.2"
+    "fomantic-ui": "^2.8.4",
+    "gulp": "^4.0.2",
+    "gulp-json-editor": "^2.5.4",
+    "inquirer": "^7.0.5",
+    "npm-check-updates": "^4.0.2"
   },
   "devDependencies": {},
   "scripts": {
