@@ -7,7 +7,7 @@
     "fomantic-ui": "^2.8.4",
     "gulp": "^4.0.2",
     "gulp-json-editor": "^2.5.4",
-    "inquirer": "^7.1.0",
+    "inquirer": "^7.3.3",
     "npm-check-updates": "^4.1.2"
   },
   "devDependencies": {},
